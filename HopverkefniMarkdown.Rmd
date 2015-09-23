@@ -1,0 +1,25 @@
+---
+title: "Hópverkefni Markdown"
+output: html_document
+---
+
+
+Smá R Markdown prufa til að sjá hvort við þurfum á Shiny að halda eða ekki.
+
+```{r}
+suppressPackageStartupMessages(library(googleVis))
+library(googleVis)
+
+
+smaprufa <- read.csv('litidtest.csv', sep=";")
+
+Motion=gvisMotionChart(smaprufa, 
+                       idvar="Hopur", 
+                       timevar="Date",
+                       sizevar="eignir")
+plot(Motion)
+```
+
+Skoða https://cran.r-project.org/web/packages/googleVis/vignettes/Using_googleVis_with_knitr.html
+
+
