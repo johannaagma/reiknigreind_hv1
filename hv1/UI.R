@@ -1,24 +1,19 @@
-library(shiny)
-
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
+shinyUI(pageWithSidebar(
+  
   
   # Application title
-  titlePanel("Hello Shiny!"),
+  headerPanel("Gögn eftir aldurshópum"),
   
-  # Sidebar with a slider input for the number of bins
-  sidebarLayout(
-    sidebarPanel(
-      sliderInput("bins",
-                  "Number of bins:",
-                  min = 1,
-                  max = 70,
-                  value = 30)
-    ),
+  sidebarPanel(
     
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("distPlot")
-    )
+    
+    
+              ),
+  
+  
+  mainPanel(
+    
+    tableOutput("gvMotion")
+    
   )
 ))
