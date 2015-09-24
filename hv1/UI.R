@@ -6,14 +6,11 @@ shinyUI(pageWithSidebar(
   
   sidebarPanel(
     
-    
-    
-              ),
-  
+               ),
   
   mainPanel(
     
     tableOutput("gvMotion")
     
-  )
+           )
 ))
