@@ -2,8 +2,8 @@ library(googleVis)
 
 smaprufa <- read.csv('litidtest.csv', sep=";")
 
-Motion=gvisMotionChart(smaprufa, 
-                       idvar="Hopur", 
+Motion=gvisMotionChart(total, 
+                       idvar="Age", 
                        timevar="Date",
                        sizevar="eignir")
 plot(Motion)
