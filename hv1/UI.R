@@ -2,10 +2,14 @@ shinyUI(pageWithSidebar(
   
   
   # Application title
-  headerPanel("Gögn eftir aldurshópum"),
+  headerPanel("Data by agegroup"),
   
   sidebarPanel(
     
+            p(class = "text-muted",
+              paste("Hér kemur smá lýsing")
+              
+                )
                ),
   
   mainPanel(
