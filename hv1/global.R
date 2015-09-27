@@ -47,8 +47,7 @@ names(annualIncome) <- c("Date", "Age", annualIncome_TITLE)
 annualIncome$Age <- fixAgeString(annualIncome$Age, getCorrectString3)
 
 #=================================================================
-# Liabilities, assets and net worth of individuals by family type, 
-# age and residence (total liabilities)
+# Liabilities (average)
 #=================================================================
 liabilities_TITLE <- "Liabilities of individuals [Million ISK]"
 liabilities <- getData(
@@ -59,6 +58,20 @@ liabilities <- getData(
 colnames(liabilities) <- c("Date", "Age", liabilities_TITLE)
 liabilities$Age <- fixAgeString(liabilities$Age, getCorrectString3)
 
+
+#=================================================================
+# Assets (average)
+#=================================================================
+assets_TITLE <- "Assets of individuals [Million ISK]"
+assets <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000ens.px",
+  list("Year"=c("*"),
+       "Family type, age and residence"=as.character(c(5:14)), 
+       "Liabilities, Assets and Net worth"="1"))
+colnames(assets) <- c("Date", "Age", assets_TITLE)
+assets$Age <- fixAgeString(assets$Age, getCorrectString3)
+
+
 #=================================================================
 # Fertility
 #=================================================================
@@ -68,6 +81,7 @@ fertility <- getData(
   list("Year"=as.character(c(149:193)),
        "Age"=c("*")))
 fertility <- setUpFinalTable(fertility, fertility_TITLE)
+fertility$Age <- sub(" years","",fertility$Age)
 
 #=================================================================
 # Merging the data
