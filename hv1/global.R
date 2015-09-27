@@ -42,7 +42,7 @@ annualIncome <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09001ens.px",
   list("Year"=c("*"), 
        "Family type, age and residence"=as.character(c(5:14)),
-       "Income and Expenses"="0"))
+       "Income and Expenses"="1"))
 names(annualIncome) <- c("Date", "Age", annualIncome_TITLE)
 annualIncome$Age <- fixAgeString(annualIncome$Age, getCorrectString3)
 
