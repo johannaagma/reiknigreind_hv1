@@ -59,23 +59,24 @@ transposeTable <- function(table) {
   return(newTable)
 }
 
-# Notkun: newTable = fixColNames_age(table)
-# Fyrir: titlarnir á dálkunum í table (frá og meğ dálk 2) eru á 
-#        forminu: "X15.19" og "X60.ára.og.eldri"
-# Eftir: búiğ er ağ breyta şessum titlum yfir á formiğ: "15-19 ára" og
+# Notkun: newList = fixAgeString(list, function)
+# Fyrir: strengirnir í list eru annağhvort á forminu "X15.19" og "X60.ára.og.eldri"
+#        og meğ falliğ getCorrectString1, EĞA:
+#        á forminu "15-19" og "60 ára og eldri" og falliğ getCorrectString2
+# Eftir: búiğ er ağ breyta şessum strengjunum yfir á formiğ: "15-19 ára" og
 #        "60+ ára"
-fixColNames_age <- function(table) {
-  for(i in (2:ncol(table))) {
-    names(table)[i] <- getCorrectString(names(table)[i])
+fixAgeString <- function(list, correctStringFunction) {
+  for(i in (1:length(list))) {
+    list[i] <- correctStringFunction(list[i])
   }
-  return(table)
+  return(list)
 }
 
-# Notkun: newStr = getCorrectString(str)
+# Notkun: newStr = getCorrectString1(str)
 # Fyrir: str er á forminu: "X15.19" og "X60.ára.og.eldri"
 # Eftir: búiğ er ağ breyta string yfir á formiğ: "15-19 ára" og
 #        "60+ ára"
-getCorrectString <- function(str) {
+getCorrectString1 <- function(str) {
   interval <- strsplit(str, "\\.")
   newString <- ""
   if(length(interval[[1]]) == 2) {
@@ -90,20 +91,39 @@ getCorrectString <- function(str) {
   return(newString)
 }
 
-
-# Notkun: newTable = renameVector(vector)
-# Fyrir: gildin í vector eru strengir sem innihalda ".", t.d. 
-#        "Konur.2001" eğa "Alls.lifandi.fædd.börn.35.39.ára"
-# Eftir: búiğ er ağ setja fyrsta gildiğ sem gefur eftir fyrstu tilkomu
-#        tölustafs, t.d. "2001" og "35.39.ára"
-renameVector <- function(vector) {
-  list = c() # eğa = character()
-  for(i in (1:length(vector))) {
-    idx = getIndexOfFirstNumber(vector[i])
-    temp = substring(vector[i], idx)
-    list[i] = temp
+# Notkun: newStr = getCorrectString2(str)
+# Fyrir: str er á forminu: "15-19" og "60 ára og eldri"
+# Eftir: búiğ er ağ breyta string yfir á formiğ: "15-19 ára" og
+#        "60+ ára"
+getCorrectString2 <- function(str) {
+  strSplit <- strsplit(str, " ")
+  strSplit <- strSplit[[1]]
+  
+  newString <- ""
+  if(length(strSplit) == 1) {
+    newString <- paste0(strSplit[1], " ára")
+  } else if(FALSE) { #ef şağ er yngri şarna
+    
+  } else if(match("eldri", strSplit)){ #ef şağ er eldri şarna
+    newString <- paste0(strSplit[1], "+ ára")
   }
-  return(list)
+  
+  return(newString)
+}
+
+# Notkun: newTable = removeFirstWords(list)
+# Fyrir: strengirnir í list innihalda ".", t.d. 
+#        "Konur.2001" eğa "Alls.lifandi.fædd.börn.35.39.ára"
+# Eftir: búiğ er ağ klippa alla strengi í list şannig ağ eftir er strengurinn
+#        fyrir aftan fyrstu tilkomu tölustafs, t.d. "2001" og "35.39.ára"
+removeFirstWords <- function(list) {
+  newList = c() # eğa = character()
+  for(i in (1:length(list))) {
+    idx = getIndexOfFirstNumber(list[i])
+    temp = substring(list[i], idx)
+    newList[i] = temp
+  }
+  return(newList)
 }
 
 # Notkun: idx = getIndexOfFirstNumber(str)
@@ -118,4 +138,11 @@ getIndexOfFirstNumber <- function(str) {
     idx = c(idx, temp)
   }
   return(min(idx, na.rm=TRUE))
+}
+
+# Notkun: newTable = removeFirstColumn(table)
+# Fyrir: ekkert
+# Eftir: búiğ er ağ fjarlægja fyrsta dálkinn í table
+removeFirstColumn <- function(table) {
+  return(table[,2:ncol(table)])
 }
