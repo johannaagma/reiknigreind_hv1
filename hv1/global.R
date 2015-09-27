@@ -36,7 +36,7 @@ divorces_f <- setUpFinalTable(divorces_f, divorces_f_TITLE)
 #=================================================================
 # Income and expenses by family type, age and residence
 #=================================================================
-#TODO breyta 0-15 í <15
+#TODO breyta 0-15 ? <15
 annualIncome_TITLE <- "Total annual income [Million ISK]"
 annualIncome <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09001ens.px",
@@ -55,7 +55,7 @@ liabilities <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000ens.px",
   list("Year"=c("*"),
        "Family type, age and residence"=as.character(c(5:14)), 
-       "Liabilities, Assets and Net worth"="8"))
+       "Liabilities, Assets and Net worth"="9"))
 colnames(liabilities) <- c("Date", "Age", liabilities_TITLE)
 liabilities$Age <- fixAgeString(liabilities$Age, getCorrectString3)
 
