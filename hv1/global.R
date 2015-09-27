@@ -55,14 +55,13 @@ faeding <- getData("http://px.hagstofa.is/pxis/api/v1/is/Ibuar/Faeddir/faedingar
                         "Aldur"=c("*")))
 faeding <- setUpFinalTable(faeding, "Faedingartidni")
 
-
-
-
-
-
-total <- merge(tekjur_kvk, skuldir, by=c("Date", "Age"))
-
-
+#=================
+# Merging the data
+#=================
+total <- merge(hjonavigslur_kvk, logskilnadur_kvk, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, tekjur_kvk, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, skuldir, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, faeding, by=c("Date", "Age"), all=TRUE)
 
 
 
