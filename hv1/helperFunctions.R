@@ -73,10 +73,35 @@ fixAgeString <- function(list, correctStringFunction) {
 }
 
 # Notkun: newStr = getCorrectString1(str)
-# Fyrir: str er á forminu: "X15.19" og "X60.ára.og.eldri"
+# Fyrir: str er á forminu: "15-19" og "60 ára og eldri"
 # Eftir: búið er að breyta string yfir á formið: "15-19 ára" og
 #        "60+ ára"
 getCorrectString1 <- function(str) {
+  strSplit <- strsplit(str, " ")
+  strSplit <- strSplit[[1]]
+  
+  newString <- ""
+  if(length(strSplit) == 1) {
+    newString <- paste0(strSplit[1], " ára")
+  } 
+  else if("yngri" %in% strSplit) { #ef það er yngri þarna
+    newString <- paste0("< ",strSplit[1], " ára")
+  } 
+  else if("eldri" %in% strSplit){ #ef það er eldri þarna
+    newString <- paste0(strSplit[1], "+ ára")
+  } 
+  else {
+    newString <- str
+  }
+  
+  return(newString)
+}
+
+# Notkun: newStr = getCorrectString2(str)
+# Fyrir: str er á forminu: "X15.19" og "X60.ára.og.eldri"
+# Eftir: búið er að breyta string yfir á formið: "15-19 ára" og
+#        "60+ ára"
+getCorrectString2 <- function(str) {
   interval <- strsplit(str, "\\.")
   newString <- ""
   if(length(interval[[1]]) == 2) {
@@ -88,26 +113,6 @@ getCorrectString1 <- function(str) {
   else if (length(interval[[1]]) == 4) {
     newString <- paste0(interval[[1]][1], "+ ára")
   }
-  return(newString)
-}
-
-# Notkun: newStr = getCorrectString2(str)
-# Fyrir: str er á forminu: "15-19" og "60 ára og eldri"
-# Eftir: búið er að breyta string yfir á formið: "15-19 ára" og
-#        "60+ ára"
-getCorrectString2 <- function(str) {
-  strSplit <- strsplit(str, " ")
-  strSplit <- strSplit[[1]]
-  
-  newString <- ""
-  if(length(strSplit) == 1) {
-    newString <- paste0(strSplit[1], " ára")
-  } else if(FALSE) { #ef það er yngri þarna
-    
-  } else if(match("eldri", strSplit)){ #ef það er eldri þarna
-    newString <- paste0(strSplit[1], "+ ára")
-  }
-  
   return(newString)
 }
 
