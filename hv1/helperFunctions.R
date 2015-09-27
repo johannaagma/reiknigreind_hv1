@@ -1,6 +1,6 @@
-# Notkun: data = getData(url, dims)
-# Fyrir: ekkert
-# Eftir: data eru dataFrame af gögnunum frá url, með query-ið dims
+# Usage: data = getData(url, dims)
+# Before: nothing
+# After: data is the table retrieved from url with the query dims 
 getData <- function(url, dims) {
   table <- data.table(get_pxweb_data(
     url=url, 
@@ -10,19 +10,19 @@ getData <- function(url, dims) {
   return(as.data.frame(table))
 }
 
-# Notkun: newTable = setUpFinalTable(table, colName)
-# Fyrir: table er tafla þar sem fyrsti dálkurinn er ártal,
-#        og hinu dálkarnir eru aldurshópar. Þ.e.:
-#           aldur aldur aldur
-#       ár
-#       ár
-#       ár
-# Eftir: newTable er dataframe með Date(ártal), 
-#        Age(aldursbil) og colName(meginupplýsingarnar úr table)
+# Usage: newTable = setUpFinalTable(table, colName)
+# Before: table is a table where the first column is the date (in years),
+#         and the first row (name of columns) is the age. That is:
+#             age age age
+#       year
+#       year
+#       year
+# After: newTable is a new table with three columns: Date(year)
+#        Age and the main data itself
 setUpFinalTable <- function(table, colName) {
   Date <- numeric()
   for(i in (1:nrow(table))) {
-    Date <- c(Date, rep(table$Ár[i], ncol(table)-1))
+    Date <- c(Date, rep(table$Year[i], ncol(table)-1))
   }
   
   Age <- rep(names(table)[2:ncol(table)], nrow(table))
@@ -38,33 +38,34 @@ setUpFinalTable <- function(table, colName) {
   return(dataFrame)
 }
 
-# Notkun: newTable = transposeTable(table)
-# Fyrir: table lítur út svona:
-#        z  x x
+# Usage: newTable = transposeTable(table)
+# Before: table looks like this:
+#        z      x x
 #        y
 #        y
-# Eftir: newTable lítur út svona:
-#        Ár y y
+# After: newTable looks like this:
+#        Date   y y
 #        x
 #        x
-#        Búið er að snúa töflunni við, og fyrsti dálkurinn
-#        fær nafnið "Ár"
+#        That is, newTable is the transpose of table,
+#        and the name of the first column is "Date"
 transposeTable <- function(table) {
   firstColumn <- names(table)
-  newTable <- data.frame("Ár" = firstColumn[2:length(firstColumn)])
+  newTable <- data.frame("Year" = firstColumn[2:length(firstColumn)])
   
   for(i in(1:nrow(table))) {
-    newTable[, as.character(table[i,1])] <- as.numeric(table[i,2:ncol(table)])
+    newTable[, as.character(table[i,1])] <- 
+      as.numeric(table[i,2:ncol(table)])
   }
   return(newTable)
 }
 
-# Notkun: newList = fixAgeString(list, function)
-# Fyrir: strengirnir í list eru annaðhvort á forminu "X15.19" og "X60.ára.og.eldri"
-#        og með fallið getCorrectString1, EÐA:
-#        á forminu "15-19" og "60 ára og eldri" og fallið getCorrectString2
-# Eftir: búið er að breyta þessum strengjunum yfir á formið: "15-19 ára" og
-#        "60+ ára"
+# Usage: newList = fixAgeString(list, stringFunction)
+# Before: the strings in list are age intervals, and the function
+#         stringFunction can convert each string  to the right
+#         format (i.e. "14>", "15-19", "60<")
+# After: newList contains all the strings in list, but in the right
+#        format
 fixAgeString <- function(list, correctStringFunction) {
   for(i in (1:length(list))) {
     list[i] <- correctStringFunction(list[i])
@@ -72,24 +73,24 @@ fixAgeString <- function(list, correctStringFunction) {
   return(list)
 }
 
-# Notkun: newStr = getCorrectString1(str)
-# Fyrir: str er á forminu: "15-19" og "60 ára og eldri"
-# Eftir: búið er að breyta string yfir á formið: "15-19 ára" og
-#        "60+ ára"
+# Usage: newStr = getCorrectString1(str)
+# Before: str can be in the format: "14 and under", "15-19" and 
+#         "60 years and over"
+# After: newStr is str but in the right format: "14>", "15-19" and "60<"
 getCorrectString1 <- function(str) {
   strSplit <- strsplit(str, " ")
   strSplit <- strSplit[[1]]
   
   newString <- ""
-  if(length(strSplit) == 1) {
-    newString <- paste0(strSplit[1], " ára")
+  if("under" %in% strSplit) { 
+    newString <- paste0(strSplit[1], ">")
   } 
-  else if("yngri" %in% strSplit) { #ef það er yngri þarna
-    newString <- paste0("< ",strSplit[1], " ára")
+  else if("over" %in% strSplit){
+    newString <- paste0(strSplit[1], "<")
   } 
-  else if("eldri" %in% strSplit){ #ef það er eldri þarna
-    newString <- paste0(strSplit[1], "+ ára")
-  } 
+  else if(length(strSplit) == 2) {
+    newString <- strSplit[1]
+  }
   else {
     newString <- str
   }
@@ -97,32 +98,61 @@ getCorrectString1 <- function(str) {
   return(newString)
 }
 
-# Notkun: newStr = getCorrectString2(str)
-# Fyrir: str er á forminu: "X15.19" og "X60.ára.og.eldri"
-# Eftir: búið er að breyta string yfir á formið: "15-19 ára" og
-#        "60+ ára"
-getCorrectString2 <- function(str) {
-  interval <- strsplit(str, "\\.")
+# Usage: newStr = getCorrectString1(str)
+# Before: str can be in the format: "< 14 years", "15-19 years" 
+#         and "60+ years"
+# After: newStr is str but in the right format: "14>", "15-19" 
+#        and "60<"
+getCorrectString3 <- function(str) {
+  strSplit <- strsplit(str, " ")
+  strSplit <- strSplit[[1]]
+  
   newString <- ""
-  if(length(interval[[1]]) == 2) {
-    newString <- paste0(interval[[1]][1], "- ára")
+  if("<" %in% strSplit) { 
+    newString <- paste0(strSplit[2], ">")
+  } 
+  else if(grepl("\\+", str)){
+    strSplit <- strsplit(gsub("\\+","",str), " ")
+    strSplit <- strSplit[[1]]
+    newString <- paste0(strSplit[1], "<")
+  } 
+  else {
+    newString <- strSplit[1]
   }
-  else if(length(interval[[1]]) == 3) {
-    newString <- paste0(interval[[1]][1], "-", interval[[1]][2]," ára")
+  
+  return(newString)
+}
+
+# Usage: newStr = getCorrectString2(str)
+# Before: str can be in the format: "14.ára", "15.19.ára" and 
+#         "60.ára.og.eldri"
+# After: newStr is str but in the right format: "14>", "15-19"
+#        and "60<"
+getCorrectString2 <- function(str) {
+  strSplit <- strsplit(str, "\\.")
+  strSplit <- strSplit[[1]]
+  
+  newString <- ""
+  if(length(strSplit) == 2) {
+    newString <- paste0(strSplit[1], ">")
   }
-  else if (length(interval[[1]]) == 4) {
-    newString <- paste0(interval[[1]][1], "+ ára")
+  else if(length(strSplit) == 3) {
+    newString <- paste0(strSplit[1], "-", strSplit[2])
+  }
+  else if (length(strSplit) == 4) {
+    newString <- paste0(strSplit[1], "<")
   }
   return(newString)
 }
 
-# Notkun: newTable = removeFirstWords(list)
-# Fyrir: strengirnir í list innihalda ".", t.d. 
-#        "Konur.2001" eða "Alls.lifandi.fædd.börn.35.39.ára"
-# Eftir: búið er að klippa alla strengi í list þannig að eftir er strengurinn
-#        fyrir aftan fyrstu tilkomu tölustafs, t.d. "2001" og "35.39.ára"
+# Usage: newTable = removeFirstWords(list)
+# Before: the strings in list contain ".", e.g. "Women.2001", 
+#         "x.35.39.years" and "bla.asdf.12.lorem.ipsum"
+# After: every string is list has been cut, so that the only thing
+#        that is left is the part after the first index of a number. 
+#        e.g. "2001", "12.lorem.ipsum" and "35.39.years"
 removeFirstWords <- function(list) {
-  newList = c() # eða = character()
+  newList = c()
   for(i in (1:length(list))) {
     idx = getIndexOfFirstNumber(list[i])
     temp = substring(list[i], idx)
@@ -131,23 +161,24 @@ removeFirstWords <- function(list) {
   return(newList)
 }
 
-# Notkun: idx = getIndexOfFirstNumber(str)
-# Fyrir: str inniheldur amk eina tölu í sér
-# Eftir: idx segir til um hvar fyrst tölustafurinn í str er
-#        staðsettur
+# Usage: idx = getIndexOfFirstNumber(str)
+# Before: str contains at least one number
+# After: idx is the index of where the first number is in str
 getIndexOfFirstNumber <- function(str) {
   idx  = c()
   for(i in(0: nchar(str))) {
-    temp = lapply(strsplit(str, ''), function(x) which(x == toString(i)))
+    temp = lapply(strsplit(str, ''), 
+                  function(x) which(x == toString(i)))
     temp = temp[[1]][1]
     idx = c(idx, temp)
   }
   return(min(idx, na.rm=TRUE))
 }
 
-# Notkun: newTable = removeFirstColumn(table)
-# Fyrir: ekkert
-# Eftir: búið er að fjarlægja fyrsta dálkinn í table
+# Usage: newTable = removeFirstColumn(table)
+# Before: nothing
+# After: newTable is table but where the first column 
+#        in has been removed
 removeFirstColumn <- function(table) {
   return(table[,2:ncol(table)])
 }

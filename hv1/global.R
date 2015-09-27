@@ -4,65 +4,75 @@ library(data.table)
 library(pxweb)
 source("helperFunctions.R")
 
-smaprufa <- read.csv('litidtest.csv', sep=";")
+#=================================================================
+# Marriages by age of spouses (female)
+#=================================================================
+marriages_f_TITLE <- "Marriages of spouses (female)"
+marriages_f <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Giftingar/MAN06101.px",
+  list("Sex"="1", 
+       "Year"=as.character(c(8:48)), 
+       "Age"=as.character(c(1:10))))
+marriages_f <- removeFirstColumn(marriages_f)
 
-#===================================
-# Hjónavígslur eftir aldri brúðhjóna
-#===================================
-hjonavigslur_kvk <- getData("http://px.hagstofa.is/pxis/api/v1/is/Ibuar/fjolsk/Giftingar/MAN06101.px",
-                           list("Kyn"="1", "Ár"=as.character(c(8:48)), "Aldur"=as.character(c(1:10))))
-hjonavigslur_kvk <- removeFirstColumn(hjonavigslur_kvk)
-names(hjonavigslur_kvk)[2:ncol(hjonavigslur_kvk)] <- 
-  fixAgeString(names(hjonavigslur_kvk)[2:ncol(hjonavigslur_kvk)], getCorrectString1)
-hjonavigslur_kvk <- setUpFinalTable(hjonavigslur_kvk, "Hjonavigslur_kvk")
+names(marriages_f)[2:ncol(marriages_f)] <- 
+  fixAgeString(names(marriages_f)[2:ncol(marriages_f)], getCorrectString1)
+marriages_f <- setUpFinalTable(marriages_f, marriages_f_TITLE)
 
-#===============================
-# Lögskilnaðir eftir aldri hjóna
-#===============================
-logskilnadur_kvk <- getData("http://px.hagstofa.is/pxis/api/v1/is/Ibuar/fjolsk/Skilnadir/MAN06202.px",
-                            list("Kyn"="1", "Ár"=as.character(c(10:20)), "Aldur"=as.character(c(1:10))))
-logskilnadur_kvk <- removeFirstColumn(logskilnadur_kvk)
-names(logskilnadur_kvk)[2:ncol(logskilnadur_kvk)] <- 
-  fixAgeString(names(logskilnadur_kvk)[2:ncol(logskilnadur_kvk)], getCorrectString1)
-logskilnadur_kvk <- setUpFinalTable(logskilnadur_kvk, "Logskilnadur_kvk")
+#=================================================================
+# Divorces by age of couples (female)
+#=================================================================
+divorces_f_TITLE <- "Divorces of couples (female)"
+divorces_f <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Skilnadir/MAN06202.px",
+  list("Sex"="1", 
+       "Year"=as.character(c(10:20)), 
+       "Age"=as.character(c(1:10))))
+divorces_f <- removeFirstColumn(divorces_f)
+names(divorces_f)[2:ncol(divorces_f)] <- 
+  fixAgeString(names(divorces_f)[2:ncol(divorces_f)], getCorrectString1)
+divorces_f <- setUpFinalTable(divorces_f, divorces_f_TITLE)
 
-#====================================================
-# Meðalatvinnutekjur í aðalstarfi eftir kyni og aldri
-#====================================================
-##TODO breyta 0-15 í <15
-tekjur_kvk <- getData("http://px.hagstofa.is/pxis/api/v1/is/Samfelag/launogtekjur/3_tekjur/VIN07002.px",
-                      list("Landshlutar"="0", "Aldur"=as.character(c(1:14)),"Kyn"="2", "Ár"=c("*")))
-tekjur_kvk <- removeFirstColumn(tekjur_kvk)
-tekjur_kvk <- transposeTable(tekjur_kvk)
-tekjur_kvk[,1] <- removeFirstWords(as.character(tekjur_kvk[,1]))
-tekjur_kvk[,1] <- as.numeric(tekjur_kvk[,1])
-tekjur_kvk <- setUpFinalTable(tekjur_kvk, "Tekjur_kvk")
+#=================================================================
+# Income and expenses by family type, age and residence
+#=================================================================
+#TODO breyta 0-15 í <15
+annualIncome_TITLE <- "Total annual income [Million ISK]"
+annualIncome <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09001ens.px",
+  list("Year"=c("*"), 
+       "Family type, age and residence"=as.character(c(5:14)),
+       "Income and Expenses"="0"))
+names(annualIncome) <- c("Date", "Age", annualIncome_TITLE)
+annualIncome$Age <- fixAgeString(annualIncome$Age, getCorrectString3)
 
-#=====================================================================================
-# Skuldir, eignir og eiginfjárstaða einstaklinga eftir fjölskyldugerð, aldri og búsetu
-#=====================================================================================
-skuldir <- getData("http://px.hagstofa.is/pxis/api/v1/is/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000.px",
-                      list("Ár"=c("*"),
-                           "Fjölskyldugerð, aldur og búseta"=as.character(c(5:14)), 
-                           "Skuldir, eignir og eiginfjárstaða"="8"))
-colnames(skuldir) <- c("Date", "Age", "Skuldir")
+#=================================================================
+# Liabilities, assets and net worth of individuals by family type, 
+# age and residence (total liabilities)
+#=================================================================
+liabilities_TITLE <- "Liabilities of individuals [Million ISK]"
+liabilities <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000ens.px",
+  list("Year"=c("*"),
+       "Family type, age and residence"=as.character(c(5:14)), 
+       "Liabilities, Assets and Net worth"="8"))
+colnames(liabilities) <- c("Date", "Age", liabilities_TITLE)
+liabilities$Age <- fixAgeString(liabilities$Age, getCorrectString3)
 
-#==============
-# Fæðingartíðni
-#==============
-faeding <- getData("http://px.hagstofa.is/pxis/api/v1/is/Ibuar/Faeddir/faedingar/MAN05201.px",
-                   list("Ár"=as.character(c(149:193)),
-                        "Aldur"=c("*")))
-faeding <- setUpFinalTable(faeding, "Faedingartidni")
+#=================================================================
+# Fertility
+#=================================================================
+fertility_TITLE <- "Fertility [pr 1000 women]"
+fertility <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/Faeddir/faedingar/MAN05201.px",
+  list("Year"=as.character(c(149:193)),
+       "Age"=c("*")))
+fertility <- setUpFinalTable(fertility, fertility_TITLE)
 
-#=================
+#=================================================================
 # Merging the data
-#=================
-total <- merge(hjonavigslur_kvk, logskilnadur_kvk, by=c("Date", "Age"), all=TRUE)
-total <- merge(total, tekjur_kvk, by=c("Date", "Age"), all=TRUE)
-total <- merge(total, skuldir, by=c("Date", "Age"), all=TRUE)
-total <- merge(total, faeding, by=c("Date", "Age"), all=TRUE)
-
-
-
-
+#=================================================================
+total <- merge(marriages_f, divorces_f, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, annualIncome, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, liabilities, by=c("Date", "Age"), all=TRUE)
+total <- merge(total, fertility, by=c("Date", "Age"), all=TRUE)
