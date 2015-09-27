@@ -5,10 +5,7 @@ shinyServer(function(input, output) {
   
   output$gvMotion <- renderGvis({
     
-  gvisMotionChart(total, 
-                  idvar="Age", 
-                  timevar="Date",
-                  )
+  gvisMotionChart(smaprufa, idvar="Hopur", timevar="Date",sizevar="eignir")
   
                                 })
   })
