@@ -1,16 +1,7 @@
 shinyUI(pageWithSidebar(
   
-  
   # Application title
-  headerPanel("Gögn eftir aldurshópum"),
-  
-  sidebarPanel(
-    
-               ),
-  
-  mainPanel(
-    
-    tableOutput("gvMotion")
-    
-           )
+  headerPanel("Data by age"),
+  sidebarPanel(),
+  mainPanel(tableOutput("gvMotion"))
 ))
