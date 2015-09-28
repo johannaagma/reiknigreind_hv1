@@ -7,13 +7,13 @@ source("helperFunctions.R")
 #=================================================================
 # Marriages by age of spouses (female)
 #=================================================================
-marriages_f_TITLE <- "Marriages of spouses (female)"
+marriages_f_TITLE <- "Marriages of spouses"
 marriages_f <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Giftingar/MAN06101.px",
   list("Sex"="1", 
        "Year"=as.character(c(8:48)), 
        "Age"=as.character(c(1:10))))
-marriages_f <- removeColumn(marriages_f, 1)
+marriages_f <- removeColumns(marriages_f, 1)
 
 names(marriages_f)[2:ncol(marriages_f)] <- 
   fixAgeString(names(marriages_f)[2:ncol(marriages_f)], getCorrectString1)
@@ -22,13 +22,13 @@ marriages_f <- setUpFinalTable(marriages_f, marriages_f_TITLE)
 #=================================================================
 # Divorces by age of couples (female)
 #=================================================================
-divorces_f_TITLE <- "Divorces of couples (female)"
+divorces_f_TITLE <- "Divorces of couples"
 divorces_f <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Skilnadir/MAN06202.px",
   list("Sex"="1", 
        "Year"=as.character(c(10:20)), 
        "Age"=as.character(c(1:10))))
-divorces_f <- removeColumn(divorces_f, 1)
+divorces_f <- removeColumns(divorces_f, 1)
 names(divorces_f)[2:ncol(divorces_f)] <- 
   fixAgeString(names(divorces_f)[2:ncol(divorces_f)], getCorrectString1)
 divorces_f <- setUpFinalTable(divorces_f, divorces_f_TITLE)
@@ -88,7 +88,7 @@ fertility$Age <- sub(" years","",fertility$Age)
 #=================================================================
 # Students by level, field of study, age and sex
 #=================================================================
-students_TITLE <- "Students"
+students_TITLE <- "Students in University"
 students <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Samfelag/skolamal/4_haskolastig/0_hsNemendur/SKO04106.px",
   list("ISCED level" = "Total",
@@ -96,13 +96,30 @@ students <- getData(
        "Age"=as.character(c(15:90)),
        "Year"=c("*"),
        "Sex" = "Total"))
-students <- removeColumn(students, 2)
+students <- removeColumns(students, 2)
 students$Age <- removeLatterWords(students$Age)
 names(students)[2:ncol(students)] <- 
   removeLatterWords(names(students)[2:ncol(students)])
-students <- aggregateByAge(students)
+students <- sumIntoAgeGroups1(students)
 students <- transposeTable(students)
 students <- setUpFinalTable(students, students_TITLE)
+
+#=================================================================
+# External migration
+#=================================================================
+migration_TITLE <- "Net immigration"
+migration <- getData(
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/buferlaflutningar/Buferlaflutningar/MAN01401.px",
+  list("Sex" = "Total",
+       "Year"=c("*"),
+       "Age"=as.character(c(1:110)),
+       "Citizenship" = "Total",
+       "Type of migration" = "Net immigration"))
+migration <- removeColumns(migration, 1)
+migration$Age <- removeLatterWords(migration$Age)
+migration$"Total Net immigration" <- replaceItemsInList(migration$"Total Net immigration", "-", 0)
+migration <- sumIntoAgeGroups2(migration)
+names(migration) <- c("Date", "Age", migration_TITLE)
 
 #=================================================================
 # Merging the data
@@ -113,3 +130,4 @@ allData <- merge(allData, liabilities, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, fertility, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, assets, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, students, by=c("Date", "Age"), all=TRUE)
+allData <- merge(allData, migration, by=c("Date", "Age"), all=TRUE)

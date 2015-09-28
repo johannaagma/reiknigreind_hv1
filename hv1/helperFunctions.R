@@ -176,11 +176,11 @@ getIndexOfFirstNumber <- function(str) {
   return(min(idx, na.rm=TRUE))
 }
 
-# Usage: newTable = removeColumn(table, x)
+# Usage: newTable = removeColumns(table, x)
 # Before: nothing
 # After: newTable is table but where the first x columns 
 #        have been removed
-removeColumn <- function(table, x) {
+removeColumns <- function(table, x) {
   return(table[,(x+1):ncol(table)])
 }
 
@@ -199,18 +199,18 @@ removeLatterWords <- function(list)  {
   return(as.numeric(newList))
 }
 
-# Usage: newTable = aggregateByAge(table)
+# Usage: newTable = sumIntoAgeGroups1(table)
 # Before: the first column in table is a list of age, and the
 #         first row is a list of date (year), that is:
 #         age   year  year  year
 #         15
 #         ..
 #         19
-# After: each column in newTable has the mean of 5 years from
+# After: each column in newTable has the sum of 5 years from
 #        the data in table
 #         age   year  year  year
-#         15-19 mean  mean  mean
-aggregateByAge <- function(table) {
+#         15-19 sum   sum   sum
+sumIntoAgeGroups1 <- function(table) {
   ageList <- table[[1]]
   lowestAge <- ageList[1]
   
@@ -235,12 +235,12 @@ aggregateByAge <- function(table) {
   #our new table with age intervals
   newTable <- data.frame(Age <- tempAgeList)
   
-  #creating a list of means and adding them to the new table
+  #creating a list of sums and adding them to the new table
   for(i in (2:ncol(table))) {
     idx <- lowestAgeMark
     tempList <- c()
     while(idx+4 <= nrow(table)) {
-      temp <- mean(table[idx:idx+4, i])
+      temp <- sum(table[idx:(idx+4), i])
       tempList = c(tempList, temp)
       idx <- idx+5
     }
@@ -250,4 +250,92 @@ aggregateByAge <- function(table) {
   names(newTable)[2:ncol(table)] <- names(table)[2:ncol(table)]
   
   return(newTable)
+}
+
+# Usage: newTable = sumIntoAgeGroups2(table)
+# Before: the first column in table is a list of date (year), 
+#         the second one is age and the third is the data itself, i.e.:
+#         age   date  data
+#         15    2000  ..
+#         ..    ....  ..
+#         19    2000  ..
+#         20    2000  ..
+# After: the data has the sum of 5 years and the age is now an age 
+#        interval, i.e.:
+#        age   year   data
+#        15-19 2000   sum
+#        20-24 2000   sum
+sumIntoAgeGroups2 <- function(table) {
+  table = migration
+  dateList <- unique(table[,1])
+  ageList <- unique(table[,2])
+  
+  #lowestAgeIdx is the index of the first agenumber in the youngest 
+  #age group
+  lowestAgeIdx <- -1
+  #highestAgeIdx is the index of the last agenumber in the oldest 
+  #age group
+  highestAgeIdx <- -1
+  
+  #find the index of the first agenumber that is a multiply of 5
+  for(i in (1:5)) {
+    if((ageList[i] %% 5 == 0)) {
+      lowestAgeIdx <- i
+      break
+    }
+  }
+  
+  #creating a list of age intervals
+  ageListGroups <- c()
+  idx <- lowestAgeIdx
+  while(idx+4 <= length(ageList)) {
+    temp <- paste0(ageList[idx], "-", ageList[idx+4])
+    ageListGroups <- c(ageListGroups, temp)
+    idx <- idx+5
+  }
+  highestAgeIdx <- idx-1
+  
+  newDateList <- numeric()
+  for(i in (1:length(dateList))) {
+    newDateList <- c(newDateList, rep(dateList[i], length(ageListGroups)))
+  }
+  
+  newAgeList = c(rep(ageListGroups, length(dateList)))
+  
+  #cutting out all the rows in table that aren't in any of the age groups:
+  #removing the lowest age numbers from table that will not be used
+  for(i in (1:(lowestAgeIdx-1))) {
+    table <- subset(table, table$Age != ageList[i])
+  }
+  #removing the highest age numbers from table that will not be used
+  for(i in ((highestAgeIdx+1):length(ageList))) {
+    table <- subset(table, table$Age != ageList[i])
+  }
+  rownames(table) <- 1:nrow(table)
+  dataList <- table[,3]
+  
+  #creating a list of sums and adding them to the new table
+  idx <- 1
+  newDataList <- c()
+  while(idx+4 <= length(dataList)) {
+    tempSum <- sum(dataList[idx:(idx+4)])
+    newDataList = c(newDataList, tempSum)
+    idx <- idx+5
+  }
+
+  #our new table with age intervals
+  newTable <- data.frame(newDateList, newAgeList, newDataList)
+  return(newTable)
+}
+
+# Usage: newList = replaceItemsInList(list, old, new)
+# Before: nothing
+# After: newList contains all the objects in list, but the strings 
+#        that contain the string old have been replaced with new 
+replaceItemsInList <- function(list, old, new) {
+  list = migration$"Total Net immigration"
+  for(i in (1:length(list))) {
+    list[i] <- replace(list[i], list[i]==old, new)
+  }
+  return(as.numeric(list))
 }
