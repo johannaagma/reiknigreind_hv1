@@ -12,9 +12,9 @@ marriages_f <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Giftingar/MAN06101.px",
   list("Sex"="1", 
        "Year"=as.character(c(8:48)), 
-       "Age"=as.character(c(1:10))))
+       "Age"=as.character(c(1:10))),
+  "backupData/marriages_f.csv")
 marriages_f <- removeColumns(marriages_f, 1)
-
 names(marriages_f)[2:ncol(marriages_f)] <- 
   fixAgeString(names(marriages_f)[2:ncol(marriages_f)], getCorrectString1)
 marriages_f <- setUpFinalTable(marriages_f, marriages_f_TITLE)
@@ -27,23 +27,25 @@ divorces_f <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/fjolsk/Skilnadir/MAN06202.px",
   list("Sex"="1", 
        "Year"=as.character(c(10:20)), 
-       "Age"=as.character(c(1:10))))
+       "Age"=as.character(c(1:10))),
+  "backupData/divorces_f.csv")
 divorces_f <- removeColumns(divorces_f, 1)
 names(divorces_f)[2:ncol(divorces_f)] <- 
   fixAgeString(names(divorces_f)[2:ncol(divorces_f)], getCorrectString1)
 divorces_f <- setUpFinalTable(divorces_f, divorces_f_TITLE)
 
 #=================================================================
-# Income and expenses by family type, age and residence
+# Income and expenses (average)
 #=================================================================
 annualIncome_TITLE <- "Total annual income [Million ISK]"
 annualIncome <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09001ens.px",
   list("Year"=c("*"), 
        "Family type, age and residence"=as.character(c(5:14)),
-       "Income and Expenses"="1"))
+       "Income and Expenses"="1"),
+  "backupData/annualIncome.csv")
 names(annualIncome) <- c("Date", "Age", annualIncome_TITLE)
-annualIncome$Age <- fixAgeString(annualIncome$Age, getCorrectString3)
+annualIncome$Age <- fixAgeString(as.character(annualIncome$Age), getCorrectString3)
 
 #=================================================================
 # Liabilities (average)
@@ -53,10 +55,10 @@ liabilities <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000ens.px",
   list("Year"=c("*"),
        "Family type, age and residence"=as.character(c(5:14)), 
-       "Liabilities, Assets and Net worth"="9"))
+       "Liabilities, Assets and Net worth"="9"),
+  "backupData/liabilities.csv")
 colnames(liabilities) <- c("Date", "Age", liabilities_TITLE)
-liabilities$Age <- fixAgeString(liabilities$Age, getCorrectString3)
-
+liabilities$Age <- fixAgeString(as.character(liabilities$Age), getCorrectString3)
 
 #=================================================================
 # Assets (average)
@@ -66,19 +68,20 @@ assets <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Efnahagur/thjodhagsreikningar/skuldastada_heimili/THJ09000ens.px",
   list("Year"=c("*"),
        "Family type, age and residence"=as.character(c(5:14)), 
-       "Liabilities, Assets and Net worth"="1"))
+       "Liabilities, Assets and Net worth"="1"),
+  "backupData/assets.csv")
 colnames(assets) <- c("Date", "Age", assets_TITLE)
-assets$Age <- fixAgeString(assets$Age, getCorrectString3)
-
+assets$Age <- fixAgeString(as.character(assets$Age), getCorrectString3)
 
 #=================================================================
 # Fertility
 #=================================================================
 fertility_TITLE <- "Fertility [pr 1000 women]"
 fertility <- getData(
-  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/Faeddir/faedingar/MAN05201.px",
-  list("Year"=as.character(c(149:193)),
-       "Age"=c("*")))
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/Faeddirdanir/faeddir/faedingar/MAN05201.px",
+  list("Year"=as.character(c(159:193)),
+       "Age"=as.character(c(1:7))),
+  "backupData/fertility.csv")
 names(fertility)[1] <- "Date"
 names(fertility)[2:ncol(fertility)] <- 
   fixAgeString(names(fertility)[2:ncol(fertility)], getCorrectString3)
@@ -95,9 +98,10 @@ students <- getData(
        "Broad fields of study" = "Total",
        "Age"=as.character(c(15:90)),
        "Year"=c("*"),
-       "Sex" = "Total"))
+       "Sex" = "Total"),
+  "backupData/students.csv")
 students <- removeColumns(students, 2)
-students$Age <- removeLatterWords(students$Age)
+students$Age <- removeLatterWords(as.character(students$Age))
 names(students)[2:ncol(students)] <- 
   removeLatterWords(names(students)[2:ncol(students)])
 students <- sumIntoAgeGroups1(students)
@@ -114,9 +118,10 @@ migration <- getData(
        "Year"=c("*"),
        "Age"=as.character(c(1:110)),
        "Citizenship" = "Total",
-       "Type of migration" = "Net immigration"))
+       "Type of migration" = "Net immigration"),
+  "backupData/migration.csv")
 migration <- removeColumns(migration, 1)
-migration$Age <- removeLatterWords(migration$Age)
+migration$Age <- removeLatterWords(as.character(migration$Age))
 migration$"Total Net immigration" <- replaceItemsInList(migration$"Total Net immigration", "-", 0)
 migration <- sumIntoAgeGroups2(migration)
 names(migration) <- c("Date", "Age", migration_TITLE)

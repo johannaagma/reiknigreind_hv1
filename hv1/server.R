@@ -11,6 +11,5 @@ shinyServer(function(input, output) {
                   yvar="Liabilities of individuals [Million ISK]",
                   xvar="Assets of individuals [Million ISK]",
                   sizevar="Total annual income [Million ISK]")
-  
-                                })
+    })
   })

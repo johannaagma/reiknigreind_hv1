@@ -1,13 +1,23 @@
-# Usage: data = getData(url, dims)
+# Usage: data = getData(url, dims, backupTable)
 # Before: nothing
 # After: data is the table retrieved from url with the query dims 
-getData <- function(url, dims) {
-  table <- data.table(get_pxweb_data(
-    url=url, 
-    dims=dims, 
-    clean=FALSE
-  ))
-  return(as.data.frame(table))
+getData <- function(url, dims, backupTable) {
+  table <- tryCatch(
+    {
+      temp <- data.table(get_pxweb_data(
+        url=url, 
+        dims=dims, 
+        clean=FALSE
+      ))
+      as.data.frame(temp)
+    },
+    error = function(cond) {
+      return(read.csv(backupTable, skip=2, sep=";", check.names=FALSE))
+    },
+    warning = function(cond) { },
+    finally = { }
+  )
+  return(table)
 }
 
 # Usage: newTable = setUpFinalTable(table, colName)
