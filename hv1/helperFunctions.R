@@ -12,6 +12,7 @@ getData <- function(url, dims, backupTable) {
       as.data.frame(temp)
     },
     error = function(cond) {
+      message("Error: Could not upload data, using backup data.")
       return(read.csv(backupTable, skip=2, sep=";", check.names=FALSE))
     },
     warning = function(cond) { },
@@ -348,4 +349,36 @@ replaceItemsInList <- function(list, old, new) {
     list[i] <- replace(list[i], list[i]==old, new)
   }
   return(as.numeric(list))
+}
+
+# Usage: newList = removeMonthFromDate(list)
+# Before: the string in list are in the form: "yyyy-mm"
+# After: the string in newList are in the form: yyyy (numeric)
+removeMonthFromDate <- function(list) {
+  newList <- c()
+  for(i in (1: length(list))) {
+    str <- list[i]
+    strSplit <- strsplit(str, "-")
+    newList[i] <- as.numeric(strSplit[[1]][1])
+  }
+  return(newList)
+}
+
+# Usage: newTable = switchColumns(table, i, j)
+# Before: table is not empty and has column i and j
+# After: column i in newTable is the same as column j in table
+#        and vice versa
+switchColumns <- function(table, i, j) {
+  temp <- table[i]
+  table[i] <- table[j]
+  table[j] <- temp
+  return(table)
+}
+
+# Usage: newTable = removeColumn(table, i)
+# Before: table is not empty and has a column i
+# After: newTable has all the columns in table, except column i
+removeColumn <- function(table, i) {
+  table[i] <- NULL
+  return(table)
 }

@@ -2,6 +2,8 @@ library(shiny)
 library(googleVis)
 library(data.table)
 library(pxweb)
+library(rdatamarket)
+library(plyr)
 source("helperFunctions.R")
 
 #=================================================================
@@ -127,6 +129,31 @@ migration <- sumIntoAgeGroups2(migration)
 names(migration) <- c("Date", "Age", migration_TITLE)
 
 #=================================================================
+# Unemployment (Hofudborgarsvaedid)
+#=================================================================
+unemployment_TITLE <- "Unemployment (Capital area)"
+unemployment <- tryCatch(
+  {
+    dmlist("https://datamarket.com/data/set/14/atvinnulausir-eftir-aldri-og-busetu")
+  },
+  error = function(cond) {
+    message("Error: Could not upload data, using backup data.")
+    return(read.csv("backupData/unemployment.csv", sep=",", check.names=FALSE))
+  },
+  warning = function(cond) { },
+  finally = { }
+)
+unemployment <- unemployment[!(unemployment[1] == "Samtals"),]
+unemployment <- unemployment[unemployment[2] == "Höfuðborgarsvæðið",] #Hofudborgarsvaedid
+unemployment <- removeColumn(unemployment, 2)
+unemployment <- switchColumns(unemployment, 1, 2)
+names(unemployment) <- c("Date", "Age", unemployment_TITLE)
+unemployment[1] <- removeMonthFromDate(as.character(unemployment[[1]]))
+unemployment[2] <- fixAgeString(as.character(unemployment[[2]]), getCorrectString3)
+unemployment <- ddply(unemployment, .(Date, Age), numcolwise(mean)) #merging the rows
+unemployment[3] <- round(unemployment[3])
+
+#=================================================================
 # Merging the data
 #=================================================================
 allData <- merge(marriages_f, divorces_f, by=c("Date", "Age"), all=TRUE)
@@ -136,3 +163,4 @@ allData <- merge(allData, fertility, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, assets, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, students, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, migration, by=c("Date", "Age"), all=TRUE)
+allData <- merge(allData, unemployment, by=c("Date", "Age"), all=TRUE)
