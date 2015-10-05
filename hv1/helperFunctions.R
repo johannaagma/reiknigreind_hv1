@@ -382,3 +382,19 @@ removeColumn <- function(table, i) {
   table[i] <- NULL
   return(table)
 }
+# Usage: cleanTable <- finalCleanup(table)
+# Before: Table contains several rows containing almost only NA values
+# After: Every row in table has at least 2 values that are not NA
+
+finalCleanup <- function(table){
+  teljari <- 0
+  vigur <- c()
+  for(i in 1:nrow(table)) {
+    for(j in 1:ncol(table)){
+      if (is.na(table[i,j]) == TRUE) { teljari = teljari + 1}
+      if(teljari == ncol(table) - 3){vigur = append(vigur,i)}
+    }
+    teljari = 0
+  }
+  return(table[-vigur,])
+}

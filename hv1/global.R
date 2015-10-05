@@ -144,7 +144,7 @@ unemployment <- tryCatch(
   finally = { }
 )
 unemployment <- unemployment[!(unemployment[1] == "Samtals"),]
-unemployment <- unemployment[unemployment[2] == "Höfuðborgarsvæðið",] #Hofudborgarsvaedid
+unemployment <- unemployment[unemployment[2] == "HÃ¶fuÃ°borgarsvÃ¦Ã°iÃ°",] #Hofudborgarsvaedid
 unemployment <- removeColumn(unemployment, 2)
 unemployment <- switchColumns(unemployment, 1, 2)
 names(unemployment) <- c("Date", "Age", unemployment_TITLE)
@@ -164,3 +164,4 @@ allData <- merge(allData, assets, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, students, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, migration, by=c("Date", "Age"), all=TRUE)
 allData <- merge(allData, unemployment, by=c("Date", "Age"), all=TRUE)
+allData <- finalCleanup(allData)
