@@ -1,7 +1,9 @@
-# Usage: data = getData(url, dims, backupTable)
+# Usage: data = getData(url, dims, backupTable, tableName)
 # Before: nothing
 # After: data is the table retrieved from url with the query dims 
-getData <- function(url, dims, backupTable) {
+#        is anthing went wrong the table in the csv backupTable is used and 
+#        prints a warning letting know that the table tableName failed uploading
+getData <- function(url, dims, backupTable, tableName) {
   table <- tryCatch(
     {
       temp <- data.table(get_pxweb_data(
@@ -12,7 +14,7 @@ getData <- function(url, dims, backupTable) {
       as.data.frame(temp)
     },
     error = function(cond) {
-      message("Error: Could not upload data, using backup data.")
+      message("Warning: Could not upload data: '",tableName,"'. Using backup data.")
       return(read.csv(backupTable, skip=2, sep=";", check.names=FALSE))
     },
     warning = function(cond) { },

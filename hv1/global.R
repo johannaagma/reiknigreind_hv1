@@ -15,7 +15,8 @@ marriages_f <- getData(
   list("Sex"="1", 
        "Year"=as.character(c(8:48)), 
        "Age"=as.character(c(1:10))),
-  "backupData/marriages_f.csv")
+  "backupData/marriages_f.csv",
+  marriages_f_TITLE)
 marriages_f <- removeColumns(marriages_f, 1)
 names(marriages_f)[2:ncol(marriages_f)] <- 
   fixAgeString(names(marriages_f)[2:ncol(marriages_f)], getCorrectString1)
@@ -30,7 +31,8 @@ divorces_f <- getData(
   list("Sex"="1", 
        "Year"=as.character(c(10:20)), 
        "Age"=as.character(c(1:10))),
-  "backupData/divorces_f.csv")
+  "backupData/divorces_f.csv",
+  divorces_f_TITLE)
 divorces_f <- removeColumns(divorces_f, 1)
 names(divorces_f)[2:ncol(divorces_f)] <- 
   fixAgeString(names(divorces_f)[2:ncol(divorces_f)], getCorrectString1)
@@ -45,7 +47,8 @@ annualIncome <- getData(
   list("Year"=c("*"), 
        "Family type, age and residence"=as.character(c(5:14)),
        "Income and Expenses"="1"),
-  "backupData/annualIncome.csv")
+  "backupData/annualIncome.csv",
+  annualIncome_TITLE)
 names(annualIncome) <- c("Date", "Age", annualIncome_TITLE)
 annualIncome$Age <- fixAgeString(as.character(annualIncome$Age), getCorrectString3)
 
@@ -58,7 +61,8 @@ liabilities <- getData(
   list("Year"=c("*"),
        "Family type, age and residence"=as.character(c(5:14)), 
        "Liabilities, Assets and Net worth"="9"),
-  "backupData/liabilities.csv")
+  "backupData/liabilities.csv",
+  liabilities_TITLE)
 colnames(liabilities) <- c("Date", "Age", liabilities_TITLE)
 liabilities$Age <- fixAgeString(as.character(liabilities$Age), getCorrectString3)
 
@@ -71,7 +75,8 @@ assets <- getData(
   list("Year"=c("*"),
        "Family type, age and residence"=as.character(c(5:14)), 
        "Liabilities, Assets and Net worth"="1"),
-  "backupData/assets.csv")
+  "backupData/assets.csv",
+  assets_TITLE)
 colnames(assets) <- c("Date", "Age", assets_TITLE)
 assets$Age <- fixAgeString(as.character(assets$Age), getCorrectString3)
 
@@ -83,7 +88,8 @@ fertility <- getData(
   "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/Faeddirdanir/faeddir/faedingar/MAN05201.px",
   list("Year"=as.character(c(159:193)),
        "Age"=as.character(c(1:7))),
-  "backupData/fertility.csv")
+  "backupData/fertility.csv",
+  fertility_TITLE)
 names(fertility)[1] <- "Date"
 names(fertility)[2:ncol(fertility)] <- 
   fixAgeString(names(fertility)[2:ncol(fertility)], getCorrectString3)
@@ -101,7 +107,8 @@ students <- getData(
        "Age"=as.character(c(15:90)),
        "Year"=c("*"),
        "Sex" = "Total"),
-  "backupData/students.csv")
+  "backupData/students.csv",
+  students_TITLE)
 students <- removeColumns(students, 2)
 students$Age <- removeLatterWords(as.character(students$Age))
 names(students)[2:ncol(students)] <- 
@@ -115,13 +122,14 @@ students <- setUpFinalTable(students, students_TITLE)
 #=================================================================
 migration_TITLE <- "Net immigration"
 migration <- getData(
-  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/buferlaflutningar/Buferlaflutningar/MAN01401.px",
+  "http://px.hagstofa.is/pxen/api/v1/en/Ibuar/buferlaflutningar/buferlaflmillilanda/MAN01401.px",
   list("Sex" = "Total",
        "Year"=c("*"),
        "Age"=as.character(c(1:110)),
        "Citizenship" = "Total",
        "Type of migration" = "Net immigration"),
-  "backupData/migration.csv")
+  "backupData/migration.csv",
+  migration_TITLE)
 migration <- removeColumns(migration, 1)
 migration$Age <- removeLatterWords(as.character(migration$Age))
 migration$"Total Net immigration" <- replaceItemsInList(migration$"Total Net immigration", "-", 0)
@@ -137,7 +145,7 @@ unemployment <- tryCatch(
     dmlist("https://datamarket.com/data/set/14/atvinnulausir-eftir-aldri-og-busetu")
   },
   error = function(cond) {
-    message("Error: Could not upload data, using backup data.")
+    message("Warning: Could not upload data: '",unemployment_TITLE,"'. Using backup data.")
     return(read.csv("backupData/unemployment.csv", sep=",", check.names=FALSE))
   },
   warning = function(cond) { },
